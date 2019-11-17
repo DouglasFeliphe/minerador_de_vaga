@@ -1,40 +1,41 @@
 import time 
 from bs4 import BeautifulSoup
 from urllib.request import urlopen
-import requests
-import logging
-import json
+# import requests
+# import logging
+# import json
 
 
 # url = 'https://hipsters.jobs/jobs/?q=&l=Bras%C3%ADlia+-+Brasilia%2C+Federal+District%2C+Brazil'
 url = 'https://hipsters.jobs/jobs/?l=Bras%C3%ADlia%20-%20Brasilia%2C%20Federal%20District%2C%20Brazil&p=2'
 soup = BeautifulSoup(urlopen(url), "html.parser")
 
-#puxa_titulo
+# puxa código e título
 titulo = []
-for item in soup.select('.listing-item__title'):
-  texto = item.get_text().strip()
-  titulo.append(texto)
-# titulo
-
-# puxa código
 codigo = []
 for item in soup.select('.listing-item__title'):
   titulo_vaga = item.get_text().strip()
   numeros = ''
-  if(titulo_vaga.find('Cod') > -1 or titulo_vaga.find('Cód') > -1):
-    letras = titulo_vaga.rstrip('0123456789')
-    numeros = titulo_vaga[len(letras):]    
+
+  # se título possui código...
+  if(titulo_vaga.find(':') > -1):
+
+    # extraindo o título e o código
+    texto = slice(0, titulo_vaga.find(':')-4, 1) #título
+    numeros = slice((titulo_vaga.find(':')+2), 99, 1) #código
+
+    titulo.append(titulo_vaga[texto])
+    codigo.append(titulo_vaga[numeros].strip())
+
   else:
     numeros = 'sem código'
-  # print(numeros)  
-  codigo.append(numeros)
+    titulo.append(titulo_vaga)
+    codigo.append(numeros)
  
 #puxa link
 links = []
 for item in soup.select('.listing-item__title'):
   links.append(item.a.get('href'))
-
 
 # puxa data
 data = []
@@ -67,6 +68,10 @@ desc_vaga = []
 for item in soup.select('.visible-xs'):
   texto = item.get_text().strip()
   desc_vaga.append(texto)
+
+for i in codigo:
+  print(i)
+
 
 # salvar o dicionário gerado em um arquivo JSON
 # dicionario_exemplo = {
